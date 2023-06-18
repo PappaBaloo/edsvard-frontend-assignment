@@ -1,0 +1,40 @@
+.mainContainer {
+  display: grid; 
+
+   grid-template-rows: 1fr 1fr 1fr;
+   grid-template-columns: 1fr 1fr 1fr;
+   
+   grid-template-areas: 
+	'Logo-nav Postflow Profile-nav'
+	'. Postflow .'
+	'. Postflow .';
+   
+   gap: 0px;
+   height: 100%;
+
+  font-family: 'Oswald-Light', sans-serif;
+
+}
+
+.postFlow{
+  grid-area: Postflow;
+  padding-left: 5%;
+  padding-right: 5%;
+  border-left: 3px rgb(26, 92, 122) solid;
+  border-right: 3px black solid;
+}
+
+.logo{
+  grid-area: Logo-nav;
+  display: flex;
+  align-items:start;
+  justify-content: flex-start;
+  margin: 2%;
+  overflow: hidden;
+  margin-left: 5%;
+}
+
+@font-face {
+  font-family: 'Oswald-Light';
+  src: url(./fonts/Oswald-Light.ttf) format('truetype');
+}
