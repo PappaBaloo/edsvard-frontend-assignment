@@ -1,0 +1,9 @@
+.postFlow{
+    font-family: 'Oswald-Light', sans-serif;
+}
+
+@font-face {
+    font-family: 'Oswald-Light';
+    src: url(./fonts/Oswald-Light.ttf) format('truetype');
+  }
+  
