@@ -4,8 +4,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import PostFlow from './PostFlow';
 import PostForm from './PostForm';
 import React from 'react';
-import { useState } from 'react';
-import { usePostStore } from './Store';
 
 interface Post {
   id: number;
@@ -15,26 +13,35 @@ interface Post {
   username: string;
 }
 
+// Create a new instance of QueryClient
 const queryClient = new QueryClient();
 
-// The main component representing the application
+/**
+ * The main component representing the application.
+ */
 function App() {
+  // Handles the event when a new post is created
   const handlePostCreate = (post: Post) => {
-    // Add the new post logic here, such as updating the state or sending additional API requests
+    // Add the logic to handle the new post, such as updating the state or sending additional API requests
     console.log('Created post:', post);
   };
 
-  // Handles the selection of a post
-  // Param 'Post' The selected post object
+  /**
+   * Handles the selection of a post.
+   * @param post The selected post object.
+   */
   const handlePostSelect = (post: Post) => {
-    // Handle post selection logic here
+    // Handle the logic for post selection here
     console.log('Selected post:', post);
   };
 
   return (
+    // Wraps the app with QueryClientProvider to enable react-query functionality
     <QueryClientProvider client={queryClient}>
       <div className="mainContainer">
+        {/* Renders the PostForm component */}
         <PostForm onSubmit={handlePostCreate} />
+        {/* Renders the PostFlow component */}
         <PostFlow onPostSelect={handlePostSelect} />
       </div>
     </QueryClientProvider>

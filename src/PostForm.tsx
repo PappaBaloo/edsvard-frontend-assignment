@@ -15,11 +15,16 @@ interface PostFormProps {
     onSubmit: (post: Post) => void;
 }
 
+// Define a schema for validating the post data
 const postSchema = z.object({
     title: z.string().nonempty('Title is required'),
     body: z.string().nonempty('Body is required'),
 });
 
+/**
+ * Component that represents a form for creating a post.
+ * @param onSubmit Callback function when the form is submitted with a valid post.
+ */
 const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -41,6 +46,10 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         return response.json();
     });
 
+    /**
+     * Handles the form submission event.
+     * @param event The form submission event.
+     */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
