@@ -19,19 +19,10 @@ const queryClient = new QueryClient();
 
 // The main component representing the application
 function App() {
-  /*   const [posts, setPosts] = useState<Post[]>([]);
-  
-    const handlePostCreate = async (post: Post) => {
-      try {
-        // Create the post using the store's createPost function
-        const createdPost = await usePostStore.getState().createPost(post);
-  
-        // Add the new post to the beginning of the posts array
-        setPosts([createdPost, ...posts]);
-      } catch (error) {
-        console.error('Failed to create post:', error);
-      }
-    }; */
+  const handlePostCreate = (post: Post) => {
+    // Add the new post logic here, such as updating the state or sending additional API requests
+    console.log('Created post:', post);
+  };
 
   // Handles the selection of a post
   // Param 'Post' The selected post object
@@ -43,6 +34,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="mainContainer">
+        <PostForm onSubmit={handlePostCreate} />
         <PostFlow onPostSelect={handlePostSelect} />
       </div>
     </QueryClientProvider>
