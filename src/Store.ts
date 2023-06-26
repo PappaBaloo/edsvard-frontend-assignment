@@ -1,34 +1,23 @@
-import create from 'zustand';
-import axios, { AxiosError } from 'axios';
+import { create } from 'zustand';
 
 interface Post {
-    id: number;
-    userId: number;
-    title: string;
-    body: string;
+  id: number;
+  userId: number;
+  title: string;
+  body: string;
+  username: string;
 }
 
-interface PostStoreState {
+interface PostFlowState {
+  selectedPost: Post | null;
   posts: Post[];
-  createPost: (post: Post) => Promise<Post>;
+  selectPost: (post: Post) => void;
+  addPost: (post: Post) => void; // Add this line
 }
 
-export const usePostStore = create<PostStoreState>((set) => ({
+export const usePostStore = create<PostFlowState>((set) => ({
+  selectedPost: null,
   posts: [],
-  createPost: async (post) => {
-    try {
-      // Make API call to create a post
-      const response = await axios.post<Post>('https://jsonplaceholder.typicode.com/posts', post);
-
-      // Update the store's posts array with the new post
-      set((state) => ({
-        ...state,
-        posts: [...state.posts, response.data],
-      }));
-
-      return response.data;
-    } catch (error) {
-      throw error as AxiosError;
-    }
-  },
+  selectPost: (post) => set(() => ({ selectedPost: post })),
+  addPost: (post) => set((state) => ({ posts: [...state.posts, post] })), // Add this function
 }));

@@ -5,7 +5,7 @@ import PostFlow from './PostFlow';
 import PostForm from './PostForm';
 import React from 'react';
 
-interface AppPost {
+interface Post {
   id: number;
   userId: number;
   title: string;
@@ -19,9 +19,9 @@ const queryClient = new QueryClient();
 /**
  * The main component representing the application.
  */
-function App() {
+function App(): JSX.Element {
   // Handles the event when a new post is created
-  const handlePostCreate = (post: AppPost) => {
+  const handlePostCreate = (post: Post): void => {
     // Add the logic to handle the new post, such as updating the state or sending additional API requests
     console.log('Created post:', post);
   };
@@ -30,7 +30,7 @@ function App() {
    * Handles the selection of a post.
    * @param post The selected post object.
    */
-  const handlePostSelect = (post: AppPost) => {
+  const handlePostSelect = (post: Post): void => {
     // Handle the logic for post selection here
     console.log('Selected post:', post);
   };
