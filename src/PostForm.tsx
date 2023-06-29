@@ -1,70 +1,67 @@
 import React, { useState } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { z } from 'zod';
-import { usePostStore } from './Store';
 
-interface User {
-    id: number;
-    username: string;
-}
-
-interface Post {
-    id: number;
+interface FormPost {
     userId: number;
     title: string;
     body: string;
-    username: string;
 }
 
 interface PostFormProps {
-    onSubmit: (post: Post) => void;
+    onSubmit: (post: FormPost) => void;
 }
 
 const postSchema = z.object({
     title: z.string().nonempty('Title is required'),
     body: z.string().nonempty('Body is required'),
-    username: z.string().nonempty('Username is required'),
+    userId: z.number().min(1, 'User ID must be greater than 0'),
 });
 
 const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
-    const [username, setUsername] = useState('');
+    const [userId, setUserId] = useState('');
     const [formError, setFormError] = useState('');
 
-    const createPostMutation = useMutation(async (newPost: Post) => {
-        // Simulate the creation of a post
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(newPost);
-            }, 1000);
-        });
-    });
+    const queryClient = useQueryClient();
 
-    const addPostToStore = usePostStore((state) => state.addPost);
+    const createPostMutation = useMutation(async (newPost: FormPost) => {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify(newPost),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create post');
+        }
+
+        return response.json();
+    });
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         try {
-            const validatedPost = postSchema.parse({ title, body, username });
+            const validatedPost = postSchema.parse({ title, body, userId: parseInt(userId) });
 
-            const newPost: Post = {
-                id: Date.now(),
-                userId: 1, // Provide a valid user ID
+            const newPost: FormPost = {
+                userId: validatedPost.userId,
                 title: validatedPost.title,
                 body: validatedPost.body,
-                username: validatedPost.username,
             };
 
             await createPostMutation.mutateAsync(newPost);
             console.log('Post created successfully');
             onSubmit(newPost);
-            addPostToStore(newPost);
             setTitle('');
             setBody('');
-            setUsername('');
+            setUserId('');
             setFormError('');
+            queryClient.invalidateQueries('posts'); // Trigger a refetch of the 'posts' query
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const firstError = error.errors[0];
@@ -75,7 +72,6 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             }
         }
     };
-
 
     if (createPostMutation.isLoading) {
         return <div>Creating post...</div>;
@@ -88,9 +84,9 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     return (
         <form onSubmit={handleSubmit}>
             {formError && <div>{formError}</div>}
-            <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
             <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
             <input type="text" placeholder="Body" value={body} onChange={(e) => setBody(e.target.value)} />
+            <input type="number" placeholder="User ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
             <button type="submit">Create Post</button>
         </form>
     );

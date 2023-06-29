@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { create } from 'zustand';
+
+interface UserInformation {
+    id: number;
+    username: string;
+}
 
 interface Post {
     id: number;
@@ -9,90 +13,68 @@ interface Post {
     body: string;
 }
 
-interface User {
-    id: number;
-    username: string;
-}
+const getUserInformation = async (userId: number): Promise<UserInformation> => {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch user information');
+    }
+    return response.json();
+};
 
 interface PostFlowProps {
-    onPostSelect: (post: Post) => void;
+    onPostEdit: (post: Post) => void;
 }
 
-interface PostFlowState {
-    selectedPost: Post | null;
-    posts: Post[];
-    selectPost: (post: Post) => void;
-    addPost: (post: Post) => void;
-}
-
-const usePostStore = create<PostFlowState>((set) => ({
-    selectedPost: null,
-    posts: [],
-    selectPost: (post) => set(() => ({ selectedPost: post })),
-    addPost: (post) => set((state) => ({ posts: [post, ...state.posts] })),
-}));
-
-const PostFlow: React.FC<PostFlowProps> = ({ onPostSelect }) => {
-    const selectedPost = usePostStore((state) => state.selectedPost);
-    const posts = usePostStore((state) => state.posts);
-    const selectPost = usePostStore((state) => state.selectPost);
-
-    const [usersData, setUsersData] = useState<User[]>([]);
-
-    const fetchUsers = async () => {
-        const response = await fetch('https://jsonplaceholder.typicode.com/users');
-        if (!response.ok) {
-            throw new Error('Failed to fetch users');
-        }
-        const data = await response.json();
-        setUsersData(data);
-    };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const fetchPosts = async () => {
+const PostFlow: React.FC<PostFlowProps> = ({ onPostEdit }) => {
+    const { data: posts, isLoading, isError } = useQuery<Post[]>('posts', async () => {
         const response = await fetch('https://jsonplaceholder.typicode.com/posts');
         if (!response.ok) {
             throw new Error('Failed to fetch posts');
         }
-        const data = await response.json();
-        return data;
-    };
+        return response.json();
+    });
 
-    const { data, isError, isLoading } = useQuery<Post[]>('posts', fetchPosts);
-
-    useEffect(() => {
-        if (data && usersData) {
-            const postWithUsernames = data.map((post) => {
-                const user = usersData.find((user) => user.id === post.userId);
-                const username = user ? user.username : '';
-                return { ...post };
-            });
-            usePostStore.setState({ posts: postWithUsernames });
+    const { data: users, isLoading: isLoadingUsers, isError: isErrorUsers } = useQuery<UserInformation[]>(
+        'users',
+        async () => {
+            const response = await fetch('https://jsonplaceholder.typicode.com/users');
+            if (!response.ok) {
+                throw new Error('Failed to fetch user information');
+            }
+            return response.json();
         }
-    }, [data, usersData]);
+    );
 
-    const handlePostClick = (post: Post) => {
-        selectPost(post);
-        onPostSelect(post);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+    const getUserUsername = (userId: number): string => {
+        const user = users?.find((user) => user.id === userId);
+        return user?.username || '';
     };
 
-    if (isError) {
+    const handlePostEdit = (post: Post): void => {
+        setSelectedPost(post);
+        // Perform any additional logic for editing the post, such as opening a modal or navigating to an edit page
+        console.log('Editing post:', post);
+        onPostEdit(post); // Notify the parent component about the post edit
+    };
+
+    if (isLoading || isLoadingUsers) {
+        return <div>Loading posts...</div>;
+    }
+
+    if (isError || isErrorUsers) {
         return <div>Error fetching posts</div>;
     }
 
-    if (isLoading || data === undefined) {
-        return <div>Loading...</div>;
-    }
-
     return (
-        <div className="postFlow">
-            {posts.map((post) => (
-                <div key={post.id} onClick={() => handlePostClick(post)}>
-                    <h3>{post.title}</h3>
+        <div>
+            {posts?.map((post) => (
+                <div key={post.id}>
+                    <p>Username: {getUserUsername(post.userId)}</p>
+                    <h2>{post.title}</h2>
                     <p>{post.body}</p>
+                    <button onClick={() => handlePostEdit(post)}>Edit</button>
                 </div>
             ))}
         </div>
