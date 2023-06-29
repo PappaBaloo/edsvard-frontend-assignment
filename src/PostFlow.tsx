@@ -54,7 +54,7 @@ const PostFlow: React.FC<PostFlowProps> = ({ onPostEdit }) => {
 
     const handlePostEdit = (post: Post): void => {
         setSelectedPost(post);
-        // Perform any additional logic for editing the post, such as opening a modal or navigating to an edit page
+        // Perform any additional logic for editing the post
         console.log('Editing post:', post);
         onPostEdit(post); // Notify the parent component about the post edit
     };
