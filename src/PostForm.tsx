@@ -33,13 +33,14 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
             },
-        });
+        })
 
         if (!response.ok) {
             throw new Error('Failed to create post');
         }
 
         return response.json();
+
     });
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
